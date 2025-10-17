@@ -1,0 +1,55 @@
+<odoo>
+    <record id="view_form_inherit_hr_employee" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <!-- Hide existing fields -->
+            <field name="work_email" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="work_phone" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="mobile_phone" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="department_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="job_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="parent_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="coach_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="category_ids" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <!-- Hide pages -->
+            <page name="public" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+            <page name="personal_information" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+            <page name="hr_settings" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+
+            <!-- Add new fields after work_email -->
+            <field name="work_email" position="after">
+                <field name="roll" placeholder="Roll"/>
+                <field name="number" placeholder="Number" invisible="roll != 'footballer'"/>
+                <field name="age" placeholder="Age"/>
+                <field name="birthday" placeholder="Birthday"/>
+                <field name="footballer_country" placeholder="Country"/>
+                <field name="position" placeholder="Position" invisible="roll != 'footballer'" />
+            </field>
+        </field>
+    </record>
+</odoo>

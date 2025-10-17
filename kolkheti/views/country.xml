@@ -1,0 +1,33 @@
+<odoo>
+    <record id="view_fooballer_country_tree" model="ir.ui.view">
+        <field name="name">fooballer.country.tree</field>
+        <field name="model">fooballer.country</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fooballer_country_form" model="ir.ui.view">
+        <field name="name">fooballer.country.form</field>
+        <field name="model">fooballer.country</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+     <record id="action_fooballer_country" model="ir.actions.act_window">
+        <field name="name">fooballer.country</field>
+        <field name="res_model">fooballer.country</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+     <menuitem id="menu_fooballer_country" name="Fooballer Countries" parent="root_menu" action="action_fooballer_country"/>
+</odoo>

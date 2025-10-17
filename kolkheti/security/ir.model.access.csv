@@ -1,0 +1,15 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_table,table,model_table,base.group_user,1,1,1,1
+access_clubs,clubs,model_clubs,base.group_user,1,1,1,1
+access_news,news,model_news,base.group_user,1,1,1,1
+access_last_match,last_match,model_last_match,base.group_user,1,1,1,1
+access_stadiums,stadiums,model_stadiums,base.group_user,1,1,1,1
+access_next_match,next_match,model_next_match,base.group_user,1,1,1,1
+access_fooballer_country,fooballer_country,model_fooballer_country,base.group_user,1,1,1,1
+
+
+
+
+
+
+

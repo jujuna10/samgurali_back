@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree (list) view -->
+    <record id="view_stadiums_tree" model="ir.ui.view">
+        <field name="name">stadiums.tree</field>
+        <field name="model">stadiums</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stadiums_form" model="ir.ui.view">
+        <field name="name">stadiums.form</field>
+        <field name="model">stadiums</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_stadiums" model="ir.actions.act_window">
+        <field name="name">stadiums</field>
+        <field name="res_model">stadiums</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_stadiums_root" name="Stadiums" parent="root_menu" action="action_stadiums"/>
+</odoo>

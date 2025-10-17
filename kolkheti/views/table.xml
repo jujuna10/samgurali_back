@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree (list) view -->
+    <record id="view_table_tree" model="ir.ui.view">
+        <field name="name">table.tree</field>
+        <field name="model">table</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="club_id"/>
+                <field name="matches_played"/>
+                <field name="wins"/>
+                <field name="draws"/>
+                <field name="losses"/>
+                <field name="goals"/>
+                <field name="conceded_goals"/>
+                <field name="goal_difference"/>
+                <field name="club_points"/>
+                <field name="club_image" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_table_form" model="ir.ui.view">
+        <field name="name">table.form</field>
+        <field name="model">table</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group col="2">
+                        <field name="club_id"/>
+                        <field name="club_points"/>
+                    </group>
+                    <group string="Match Statistics" col="4">
+                        <field name="matches_played"/>
+                        <field name="wins"/>
+                        <field name="draws"/>
+                        <field name="losses"/>
+                        <field name="club_image" />
+                    </group>
+                    <group string="Goals" col="3">
+                        <field name="goals"/>
+                        <field name="conceded_goals"/>
+                        <field name="goal_difference" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_table" model="ir.actions.act_window">
+        <field name="name">Tables</field>
+        <field name="res_model">table</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_table_root" name="Tables" parent="root_menu" action="action_table"/>
+</odoo>
