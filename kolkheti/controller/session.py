@@ -40,7 +40,7 @@ class Table(http.Controller):
 class News(http.Controller):
     @http.route('/web/main/page/news', auth="none", cors='*', methods=['GET'])
     def news(self):
-        news_records = request.env['news'].sudo().search([], limit=2)
+        news_records = request.env['news'].sudo().search([], limit=3)
         result = []
         for i in news_records:
             result.append({
@@ -49,6 +49,24 @@ class News(http.Controller):
                 'date': i.date.strftime('%Y-%m-%d') if i.date else None,  # აქ ვუშვებთ სტრინგად
                 'text': i.text,
             'image': 'data:image/png;base64,' + i.image.decode('utf-8') if i.image else False,
+
+            })
+        return Response(
+            json.dumps({'data': result}),
+            content_type='application/json;charset=utf-8',
+        )
+
+    @http.route('/web/main/page/newses', auth="none", cors='*', methods=['GET'])
+    def newes(self):
+        news_records = request.env['news'].sudo().search([])
+        result = []
+        for i in news_records:
+            result.append({
+                'id': i.id,
+                'title': i.title,
+                'date': i.date.strftime('%Y-%m-%d') if i.date else None,
+                'text': i.text,
+                'image': 'data:image/png;base64,' + i.image.decode('utf-8') if i.image else False,
 
             })
         return Response(
@@ -95,6 +113,7 @@ class Matches(http.Controller):
                 'date': i.date.strftime('%Y-%m-%d %H:%M') if i.date else None,
                 'stadium': i.stadium.name if i.stadium else None,
                 'tournament': i.tournament,
+                'link': i.link,
             })
         return Response(
             json.dumps({'data': result}),

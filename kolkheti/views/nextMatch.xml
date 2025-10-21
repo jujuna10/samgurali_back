@@ -13,6 +13,7 @@
                     <field name="date"/>
                     <field name="stadium"/>
                     <field name="tournament"/>
+                    <field name="link" />
             </list>
         </field>
     </record>
@@ -31,6 +32,7 @@
                             <field name="date"/>
                             <field name="stadium"/>
                             <field name="tournament"/>
+                            <field name="link" />
                     </group>
                 </sheet>
             </form>

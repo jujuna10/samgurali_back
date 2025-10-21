@@ -29,6 +29,7 @@ class NextMatch(models.Model):
     date = fields.Datetime('Date')
     stadium = fields.Many2one('stadiums', string='Stadium')
     tournament = fields.Char(string='Tournament', compute='_compute_tournament', store=True)
+    link = fields.Char(string='ticket')
 
 
     @api.model
