@@ -31,7 +31,10 @@ Long description of module's purpose
         'views/lastMatch.xml',
         'views/stadiums.xml',
         'views/nextMatch.xml',
-        'views/country.xml'
+        'views/country.xml',
+        'views/stats.xml',
+        'views/video.xml',
+        'views/photos.xml'
     ]
 }
 

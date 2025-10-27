@@ -204,11 +204,30 @@ class Doctors(http.Controller):
 
 class FootballerInfo(http.Controller):
      @http.route('/web/footballer/<int:footballer_id>', auth="public", methods=['POST'], cors='*', csrf=False)
-     def car_info(self,footballer_id, **kwargs):
+     def footballer_info(self,footballer_id, **kwargs):
         footballer = request.env['hr.employee'].sudo().search(
             [('id', '=', footballer_id),
             ('roll', '=', 'footballer')
             ])
+
+        lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
+        team_stats = request.env['match.lineup'].sudo().search([])
+
+        matches = request.env['last.match'].sudo().search([])
+        all_match = len(matches)
+
+        total_goals = sum(lineup.goals for lineup in lineups)
+        total_assist = sum(lineup.assists for lineup in lineups)
+        match_played = len(lineups)
+        samgurali = request.env['table'].sudo().search([
+            ('club_id.name', '=', 'სამგურალი')
+        ], limit=1)
+
+        team_lineups = request.env['match.lineup'].sudo()
+        total_team_assist = sum(lineup.assists for lineup in team_stats)
+
+        if samgurali:
+            total_team_goals = samgurali.goals  # თუ გაქვთ goals ველი
         image_data = footballer.image_1920
         if isinstance(image_data, bytes):
             image_data = image_data.decode('utf-8')
@@ -224,6 +243,13 @@ class FootballerInfo(http.Controller):
             'name': footballer.name,
             'image': f'data:image/png;base64,{image_data}',
             'age': footballer.age,
+            'footballer_goals': total_goals,
+            'footballer_assists': total_assist,
+            'total_team_goals': total_team_goals,
+            'total_team_assists': total_team_assist,
+            'match_played': match_played,
+            'all_match': all_match,
+
         })
 
         return Response(
@@ -231,4 +257,87 @@ class FootballerInfo(http.Controller):
             content_type='application/json;charset=utf-8',
         )
 
+     @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
+     def top_scorers(self, **kwargs):
+         footballers = request.env['hr.employee'].sudo().search([('roll', '=', 'footballer')])
 
+         player_stats = []
+
+         for player in footballers:
+             lineups = request.env['match.lineup'].sudo().search([('player_id', '=', player.id)])
+
+             total_goals = sum(lineup.goals for lineup in lineups)
+             total_assists = sum(lineup.assists for lineup in lineups)
+             match_played = len(lineups)
+
+             image_data = player.image_1920
+             if isinstance(image_data, bytes):
+                 image_data = image_data.decode('utf-8')
+
+             player_stats.append({
+                 'id': player.id,
+                 'number': player.number,
+                 'position': player.position,
+                 'name': player.name,
+                 'image': f'data:image/png;base64,{image_data}',
+                 'footballer_goals': total_goals,
+                 'footballer_assists': total_assists,
+                 'match_played': match_played,
+             })
+
+         sorted_players = sorted(player_stats, key=lambda x: x['footballer_goals'], reverse=True)
+
+         top_three = sorted_players[:3]
+
+         return Response(
+             json.dumps({'data': top_three}),
+             content_type='application/json;charset=utf-8',
+         )
+
+     @http.route('/web/videos', auth="public", methods=['GET'], cors='*', csrf=False)
+     def videos(self, **kwargs):
+         video_records = request.env['video'].sudo().search([], limit=4)
+
+         videos = []
+
+         for video in video_records:
+             videos.append({
+                 'id': video.id,
+                 'link': video.name,
+                 'match_id': video.match.name if video.match else False,
+             })
+
+         return Response(
+             json.dumps({'data': videos}),
+             content_type='application/json;charset=utf-8',
+         )
+
+     @http.route('/web/photos', auth="public", methods=['GET'], cors='*', csrf=False)
+     def photos(self, **kwargs):
+         matches = request.env['last.match'].sudo().search([], limit=4, order='id desc')
+         data = []
+
+         for match in matches:
+             match_photos = []
+             for photo in match.photos_ids:
+                 # მოაშორე b'...' ფორმატირება
+                 image_data = photo.image
+                 if isinstance(image_data, bytes):
+                     image_data = image_data.decode('utf-8')
+                 elif isinstance(image_data, str) and image_data.startswith("b'"):
+                     image_data = image_data[2:-1]  # მოაშორე b' და ბოლო '
+
+                 match_photos.append({
+                     'image': f"data:image/png;base64,{image_data}" if image_data else None
+                 })
+
+             data.append({
+                 'id': match.id,
+                 'match_name': match.name,
+                 'photos': match_photos
+             })
+
+         return Response(
+             json.dumps({'data': data}),
+             content_type='application/json;charset=utf-8',
+         )

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Match Lineup Tree View -->
+    <record id="view_match_photos_tree" model="ir.ui.view">
+        <field name="name">match.photos.tree</field>
+        <field name="model">match.photos</field>
+        <field name="arch" type="xml">
+            <list string="Match Lineup">
+                <field name="image" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Match Lineup Form View -->
+    <record id="view_match_photos_form" model="ir.ui.view">
+        <field name="name">match.photos.form</field>
+        <field name="model">match.photos</field>
+        <field name="arch" type="xml">
+            <form string="Match Photos">
+                <field name="image" />
+            </form>
+        </field>
+    </record>
+
+    <record id="action_match_photos" model="ir.actions.act_window">
+        <field name="name">Match Photos</field>
+        <field name="res_model">match.photos</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_match_photos_root"
+              name="Match Photos"
+              parent="root_menu"
+              action="action_match_photos"/>
+
+</odoo>

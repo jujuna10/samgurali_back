@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Match Lineup Tree View -->
+    <record id="view_match_lineup_tree" model="ir.ui.view">
+        <field name="name">match.lineup.tree</field>
+        <field name="model">match.lineup</field>
+        <field name="arch" type="xml">
+            <list string="Match Lineup">
+                <field name="player_id"/>
+                <field name="position"/>
+                <field name="number"/>
+                <field name="goals"/>
+                <field name="assists"/>
+                <field name="yellow_cards"/>
+                <field name="red_card"/>
+                <field name="minute_in"/>
+                <field name="minute_out"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Match Lineup Form View -->
+    <record id="view_match_lineup_form" model="ir.ui.view">
+        <field name="name">match.lineup.form</field>
+        <field name="model">match.lineup</field>
+        <field name="arch" type="xml">
+            <form string="Match Lineup">
+                <group>
+                    <field name="player_id"/>
+                    <field name="position" readonly="1"/>
+                    <field name="number"/>
+                    <field name="minute_in"/>
+                    <field name="minute_out"/>
+                    <field name="yellow_cards"/>
+                    <field name="red_card"/>
+                    <field name="note"/>
+                </group>
+
+                <!-- Forward Stats -->
+                <group string="Forward Stats" invisible="position not in ['attacker', 'Attacker']">
+                    <field name="goals"/>
+                    <field name="shots"/>
+                    <field name="shots_on_target"/>
+                    <field name="key_passes"/>
+                    <field name="assists"/>
+                </group>
+
+                <!-- Midfielder Stats -->
+                <group string="Midfielder Stats" invisible="position not in ['midfielder', 'Midfielder']">
+                    <field name="goals"/>
+                    <field name="assists"/>
+                    <field name="key_passes"/>
+                    <field name="shots"/>
+                    <field name="shots_on_target"/>
+                </group>
+
+                <!-- Defender Stats -->
+                <group string="Defender Stats" invisible="position not in ['Defender', 'defender']">
+                    <field name="goals"/>
+                    <field name="assists"/>
+                    <field name="key_passes"/>
+                </group>
+
+                <!-- Goalkeeper Stats -->
+                <group string="Goalkeeper Stats" invisible="position not in ['Goalkeeper', 'goalkeeper']">
+                    <field name="saves"/>
+                    <field name="goals_conceded"/>
+                    <field name="clean_sheets"/>
+                    <field name="assists"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_match_lineup" model="ir.actions.act_window">
+        <field name="name">Match Lineup</field>
+        <field name="res_model">match.lineup</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_match_lineup_root"
+              name="Match Lineups"
+              parent="root_menu"
+              action="action_match_lineup"/>
+
+</odoo>

@@ -6,7 +6,9 @@ access_last_match,last_match,model_last_match,base.group_user,1,1,1,1
 access_stadiums,stadiums,model_stadiums,base.group_user,1,1,1,1
 access_next_match,next_match,model_next_match,base.group_user,1,1,1,1
 access_fooballer_country,fooballer_country,model_fooballer_country,base.group_user,1,1,1,1
-
+access_match_lineup,match_lineup,model_match_lineup,base.group_user,1,1,1,1
+access_video,video,model_video,base.group_user,1,1,1,1
+access_match_photos,match_photos,model_match_photos,base.group_user,1,1,1,1
 
 
 
