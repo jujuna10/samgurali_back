@@ -203,7 +203,7 @@ class Doctors(http.Controller):
         )
 
 class FootballerInfo(http.Controller):
-     @http.route('/web/footballer/<int:footballer_id>', auth="public", methods=['POST'], cors='*', csrf=False)
+     @http.route('/web/footballer/<int:footballer_id>', auth="public", methods=['GET'], cors='*', csrf=False)
      def footballer_info(self,footballer_id, **kwargs):
         footballer = request.env['hr.employee'].sudo().search(
             [('id', '=', footballer_id),
