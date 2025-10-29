@@ -203,64 +203,67 @@ class Doctors(http.Controller):
         )
 
 class FootballerInfo(http.Controller):
-     @http.route('/web/footballer/<int:footballer_id>', auth='public', type='http', methods=['GET'],csrf=False)
-     def footballer_info(self,footballer_id, **kwargs):
-        footballer = request.env['hr.employee'].sudo().search(
-            [('id', '=', footballer_id),
-            ('roll', '=', 'footballer')
-            ])
 
-        lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
-        team_stats = request.env['match.lineup'].sudo().search([])
-
-        matches = request.env['last.match'].sudo().search([])
-        all_match = len(matches)
-
-        total_goals = sum(lineup.goals for lineup in lineups)
-        total_assist = sum(lineup.assists for lineup in lineups)
-        match_played = len(lineups)
-        samgurali = request.env['table'].sudo().search([
-            ('club_id.name', '=', 'სამგურალი')
-        ], limit=1)
-
-        team_lineups = request.env['match.lineup'].sudo()
-        total_team_assist = sum(lineup.assists for lineup in team_stats)
-
-        if samgurali:
-            total_team_goals = samgurali.goals  # თუ გაქვთ goals ველი
-        image_data = footballer.image_1920
-        if isinstance(image_data, bytes):
-            image_data = image_data.decode('utf-8')
-
-        footballer_detail = []
-        footballer_detail.append({
-            'id': footballer.id,
-            'number': footballer.number,
-            'birthday': footballer.birthday,
-            'footballer_country': footballer.footballer_country.name,
-            'position': footballer.position,
-            'roll': footballer.roll,
-            'name': footballer.name,
-            'image': f'data:image/png;base64,{image_data}',
-            'age': footballer.age,
-            'footballer_goals': total_goals,
-            'footballer_assists': total_assist,
-            'total_team_goals': total_team_goals,
-            'total_team_assists': total_team_assist,
-            'match_played': match_played,
-            'all_match': all_match,
-
-        })
-
-        return Response(
-            json.dumps({'data': footballer_detail}),
-            content_type='application/json;charset=utf-8',
-            headers={
+    @http.route('/web/footballer/<int:footballer_id>',
+                auth='public',
+                type='http',
+                methods=['GET', 'OPTIONS'],
+                csrf=False)
+    def footballer_info(self, footballer_id, **kwargs):
+        # OPTIONS (CORS პრეფლაითის) მოთხოვნა
+        if request.httprequest.method == 'OPTIONS':
+            headers = {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             }
-        )
+            return Response(status=200, headers=headers)
+
+        # Footballer მოძებნა
+        footballer = request.env['hr.employee'].sudo().browse(footballer_id)
+        if not footballer.exists():
+            return Response(json.dumps({'error': 'Not found'}),
+                            status=404,
+                            content_type='application/json',
+                            headers={'Access-Control-Allow-Origin': '*'})
+
+        # სტატისტიკა
+        lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
+        matches = request.env['last.match'].sudo().search([])
+        total_goals = sum(l.goals for l in lineups)
+        total_assists = sum(l.assists for l in lineups)
+        total_played = len(lineups)
+        total_matches = len(matches)
+
+        # ფოტო
+        image_data = footballer.image_1920
+        if isinstance(image_data, bytes):
+            import base64
+            image_data = base64.b64encode(image_data).decode('utf-8')
+
+        data = {
+            'id': footballer.id,
+            'name': footballer.name,
+            'position': footballer.position,
+            'number': footballer.number,
+            'image': f'data:image/png;base64,{image_data}',
+            'goals': total_goals,
+            'assists': total_assists,
+            'played': total_played,
+            'total_matches': total_matches
+        }
+
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+
+        return Response(
+            json.dumps(data),
+            content_type='application/json;charset=utf-8',
+            headers=headers
+    )
 
      @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
      def top_scorers(self, **kwargs):
