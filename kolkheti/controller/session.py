@@ -203,7 +203,7 @@ class Doctors(http.Controller):
         )
 
 class FootballerInfo(http.Controller):
-     @http.route('/web/footballer/<int:footballer_id>', auth="public", methods=['GET'], cors='*', csrf=False)
+     @http.route('/web/footballer/<int:footballer_id>', auth='public', type='http', methods=['GET'],csrf=False)
      def footballer_info(self,footballer_id, **kwargs):
         footballer = request.env['hr.employee'].sudo().search(
             [('id', '=', footballer_id),
@@ -253,8 +253,13 @@ class FootballerInfo(http.Controller):
         })
 
         return Response(
-            json.dumps({'data': footballer_detail }),
+            json.dumps({'data': footballer_detail}),
             content_type='application/json;charset=utf-8',
+            headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            }
         )
 
      @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
