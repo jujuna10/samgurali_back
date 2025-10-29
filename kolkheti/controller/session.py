@@ -202,212 +202,147 @@ class Doctors(http.Controller):
             content_type='application/json;charset=utf-8',
         )
 
-
 class FootballerInfo(http.Controller):
-    @http.route('/web/footballer/<int:footballer_id>', auth='public', type='http', methods=['GET', 'OPTIONS'],
-                csrf=False)
-    def footballer_info(self, footballer_id, **kwargs):
-        # CORS headers
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json;charset=utf-8',
-        }
+     @http.route('/web/footballer/<int:footballer_id>', auth='public', type='http', methods=['GET'],csrf=False)
+     def footballer_info(self,footballer_id, **kwargs):
+        footballer = request.env['hr.employee'].sudo().search(
+            [('id', '=', footballer_id),
+            ('roll', '=', 'footballer')
+            ])
 
-        # OPTIONS მოთხოვნის დამუშავება (preflight request)
-        if request.httprequest.method == 'OPTIONS':
-            return Response(status=200, headers=headers)
+        lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
+        team_stats = request.env['match.lineup'].sudo().search([])
 
-        try:
-            footballer = request.env['hr.employee'].sudo().search(
-                [('id', '=', footballer_id),
-                 ('roll', '=', 'footballer')
-                 ], limit=1)
+        matches = request.env['last.match'].sudo().search([])
+        all_match = len(matches)
 
-            if not footballer:
-                return Response(
-                    json.dumps({'error': 'მოთამაშე ვერ მოიძებნა'}),
-                    headers=headers,
-                    status=404
-                )
+        total_goals = sum(lineup.goals for lineup in lineups)
+        total_assist = sum(lineup.assists for lineup in lineups)
+        match_played = len(lineups)
+        samgurali = request.env['table'].sudo().search([
+            ('club_id.name', '=', 'სამგურალი')
+        ], limit=1)
 
-            lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
-            team_stats = request.env['match.lineup'].sudo().search([])
-            matches = request.env['last.match'].sudo().search([])
+        team_lineups = request.env['match.lineup'].sudo()
+        total_team_assist = sum(lineup.assists for lineup in team_stats)
 
-            all_match = len(matches)
-            total_goals = sum(lineup.goals for lineup in lineups)
-            total_assist = sum(lineup.assists for lineup in lineups)
-            match_played = len(lineups)
+        if samgurali:
+            total_team_goals = samgurali.goals  # თუ გაქვთ goals ველი
+        image_data = footballer.image_1920
+        if isinstance(image_data, bytes):
+            image_data = image_data.decode('utf-8')
 
-            samgurali = request.env['table'].sudo().search([
-                ('club_id.name', '=', 'სამგურალი')
-            ], limit=1)
+        footballer_detail = []
+        footballer_detail.append({
+            'id': footballer.id,
+            'number': footballer.number,
+            'birthday': footballer.birthday,
+            'footballer_country': footballer.footballer_country.name,
+            'position': footballer.position,
+            'roll': footballer.roll,
+            'name': footballer.name,
+            'image': f'data:image/png;base64,{image_data}',
+            'age': footballer.age,
+            'footballer_goals': total_goals,
+            'footballer_assists': total_assist,
+            'total_team_goals': total_team_goals,
+            'total_team_assists': total_team_assist,
+            'match_played': match_played,
+            'all_match': all_match,
 
-            total_team_assist = sum(lineup.assists for lineup in team_stats)
-            total_team_goals = samgurali.goals if samgurali else 0
+        })
 
-            image_data = footballer.image_1920
-            if isinstance(image_data, bytes):
-                image_data = image_data.decode('utf-8')
+        return Response(
+            json.dumps({'data': footballer_detail}),
+            content_type='application/json;charset=utf-8',
+            headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            }
+        )
 
-            footballer_detail = [{
-                'id': footballer.id,
-                'number': footballer.number,
-                'birthday': footballer.birthday,
-                'footballer_country': footballer.footballer_country.name,
-                'position': footballer.position,
-                'roll': footballer.roll,
-                'name': footballer.name,
-                'image': f'data:image/png;base64,{image_data}',
-                'age': footballer.age,
-                'footballer_goals': total_goals,
-                'footballer_assists': total_assist,
-                'total_team_goals': total_team_goals,
-                'total_team_assists': total_team_assist,
-                'match_played': match_played,
-                'all_match': all_match,
-            }]
+     @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
+     def top_scorers(self, **kwargs):
+         footballers = request.env['hr.employee'].sudo().search([('roll', '=', 'footballer')])
 
-            return Response(
-                json.dumps({'data': footballer_detail}),
-                headers=headers
-            )
-        except Exception as e:
-            return Response(
-                json.dumps({'error': str(e)}),
-                headers=headers,
-                status=500
-            )
+         player_stats = []
 
-    @http.route('/web/top/scoreer', auth="public", type='http', methods=['GET', 'OPTIONS'], csrf=False)
-    def top_scorers(self, **kwargs):
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json;charset=utf-8',
-        }
+         for player in footballers:
+             lineups = request.env['match.lineup'].sudo().search([('player_id', '=', player.id)])
 
-        if request.httprequest.method == 'OPTIONS':
-            return Response(status=200, headers=headers)
+             total_goals = sum(lineup.goals for lineup in lineups)
+             total_assists = sum(lineup.assists for lineup in lineups)
+             match_played = len(lineups)
 
-        try:
-            footballers = request.env['hr.employee'].sudo().search([('roll', '=', 'footballer')])
-            player_stats = []
+             image_data = player.image_1920
+             if isinstance(image_data, bytes):
+                 image_data = image_data.decode('utf-8')
 
-            for player in footballers:
-                lineups = request.env['match.lineup'].sudo().search([('player_id', '=', player.id)])
-                total_goals = sum(lineup.goals for lineup in lineups)
-                total_assists = sum(lineup.assists for lineup in lineups)
-                match_played = len(lineups)
+             player_stats.append({
+                 'id': player.id,
+                 'number': player.number,
+                 'position': player.position,
+                 'name': player.name,
+                 'image': f'data:image/png;base64,{image_data}',
+                 'footballer_goals': total_goals,
+                 'footballer_assists': total_assists,
+                 'match_played': match_played,
+             })
 
-                image_data = player.image_1920
-                if isinstance(image_data, bytes):
-                    image_data = image_data.decode('utf-8')
+         sorted_players = sorted(player_stats, key=lambda x: x['footballer_goals'], reverse=True)
 
-                player_stats.append({
-                    'id': player.id,
-                    'number': player.number,
-                    'position': player.position,
-                    'name': player.name,
-                    'image': f'data:image/png;base64,{image_data}',
-                    'footballer_goals': total_goals,
-                    'footballer_assists': total_assists,
-                    'match_played': match_played,
-                })
+         top_three = sorted_players[:3]
 
-            sorted_players = sorted(player_stats, key=lambda x: x['footballer_goals'], reverse=True)
-            top_three = sorted_players[:3]
+         return Response(
+             json.dumps({'data': top_three}),
+             content_type='application/json;charset=utf-8',
+         )
 
-            return Response(
-                json.dumps({'data': top_three}),
-                headers=headers
-            )
-        except Exception as e:
-            return Response(
-                json.dumps({'error': str(e)}),
-                headers=headers,
-                status=500
-            )
+     @http.route('/web/videos', auth="public", methods=['GET'], cors='*', csrf=False)
+     def videos(self, **kwargs):
+         video_records = request.env['video'].sudo().search([], limit=4)
 
-    @http.route('/web/videos', auth="public", type='http', methods=['GET', 'OPTIONS'], csrf=False)
-    def videos(self, **kwargs):
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json;charset=utf-8',
-        }
+         videos = []
 
-        if request.httprequest.method == 'OPTIONS':
-            return Response(status=200, headers=headers)
+         for video in video_records:
+             videos.append({
+                 'id': video.id,
+                 'link': video.name,
+                 'match_id': video.match.name if video.match else False,
+             })
 
-        try:
-            video_records = request.env['video'].sudo().search([], limit=4)
-            videos = []
+         return Response(
+             json.dumps({'data': videos}),
+             content_type='application/json;charset=utf-8',
+         )
 
-            for video in video_records:
-                videos.append({
-                    'id': video.id,
-                    'link': video.name,
-                    'match_id': video.match.name if video.match else False,
-                })
+     @http.route('/web/photos', auth="public", methods=['GET'], cors='*', csrf=False)
+     def photos(self, **kwargs):
+         matches = request.env['last.match'].sudo().search([], limit=4, order='id desc')
+         data = []
 
-            return Response(
-                json.dumps({'data': videos}),
-                headers=headers
-            )
-        except Exception as e:
-            return Response(
-                json.dumps({'error': str(e)}),
-                headers=headers,
-                status=500
-            )
+         for match in matches:
+             match_photos = []
+             for photo in match.photos_ids:
+                 # მოაშორე b'...' ფორმატირება
+                 image_data = photo.image
+                 if isinstance(image_data, bytes):
+                     image_data = image_data.decode('utf-8')
+                 elif isinstance(image_data, str) and image_data.startswith("b'"):
+                     image_data = image_data[2:-1]  # მოაშორე b' და ბოლო '
 
-    @http.route('/web/photos', auth="public", type='http', methods=['GET', 'OPTIONS'], csrf=False)
-    def photos(self, **kwargs):
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json;charset=utf-8',
-        }
+                 match_photos.append({
+                     'image': f"data:image/png;base64,{image_data}" if image_data else None
+                 })
 
-        if request.httprequest.method == 'OPTIONS':
-            return Response(status=200, headers=headers)
+             data.append({
+                 'id': match.id,
+                 'match_name': match.name,
+                 'photos': match_photos
+             })
 
-        try:
-            matches = request.env['last.match'].sudo().search([], limit=4, order='id desc')
-            data = []
-
-            for match in matches:
-                match_photos = []
-                for photo in match.photos_ids:
-                    image_data = photo.image
-                    if isinstance(image_data, bytes):
-                        image_data = image_data.decode('utf-8')
-                    elif isinstance(image_data, str) and image_data.startswith("b'"):
-                        image_data = image_data[2:-1]
-
-                    match_photos.append({
-                        'image': f"data:image/png;base64,{image_data}" if image_data else None
-                    })
-
-                data.append({
-                    'id': match.id,
-                    'match_name': match.name,
-                    'photos': match_photos
-                })
-
-            return Response(
-                json.dumps({'data': data}),
-                headers=headers
-            )
-        except Exception as e:
-            return Response(
-                json.dumps({'error': str(e)}),
-                headers=headers,
-                status=500
-            )
+         return Response(
+             json.dumps({'data': data}),
+             content_type='application/json;charset=utf-8',
+         )
