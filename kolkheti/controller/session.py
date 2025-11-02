@@ -140,6 +140,27 @@ class Matches(http.Controller):
             content_type='application/json;charset=utf-8',
         )
 
+    @http.route('/web/next/matches/page', auth="none", cors='*', methods=['GET'])
+    def next_match(self):
+        next_match_records = request.env['next.match'].sudo().search([], limit=10, order='id desc')
+        result = []
+        for i in next_match_records:
+            result.append({
+                'id': i.id,
+                'away': i.away_club_id.name if i.away_club_id else None,
+                'home': i.home_club_id.name if i.home_club_id else None,
+                'away_team_photo': 'data:image/png;base64,' + i.away_photo.decode('utf-8') if i.away_photo else False,
+                'home_team_photo': 'data:image/png;base64,' + i.home_photo.decode('utf-8') if i.home_photo else False,
+                'date': i.date.strftime('%Y-%m-%d %H:%M') if i.date else None,
+                'stadium': i.stadium.name if i.stadium else None,
+                'tournament': i.tournament,
+                'link': i.link,
+            })
+        return Response(
+            json.dumps({'data': result}),
+            content_type='application/json;charset=utf-8',
+        )
+
 class Footballer(http.Controller):
     @http.route('/web/footballers', auth="public", cors='*', methods=['GET'])
     def footballers(self):
@@ -204,59 +225,75 @@ class Doctors(http.Controller):
 
 class FootballerInfo(http.Controller):
 
-    @http.route('/web/footballer/<int:footballer_id>', auth="public", methods=['GET'], cors='*')
+    @http.route('/web/footballer/<int:footballer_id>',
+                auth='public',
+                type='http',
+                methods=['GET', 'OPTIONS'],
+                csrf=False)
     def footballer_info(self, footballer_id, **kwargs):
-        footballer = request.env['hr.employee'].sudo().search(
-            [('id', '=', footballer_id),
-             ('roll', '=', 'footballer')
-             ])
+        # ეს ჰედერები უნდა დაემატოს ყველა პასუხზე
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Content-Type': 'application/json;charset=utf-8',
+        }
 
-        lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
-        team_stats = request.env['match.lineup'].sudo().search([])
+        # თუ ბრაუზერი აგზავნის OPTIONS მოთხოვნას (preflight), აქვე ვაბრუნებთ პასუხს
+        if request.httprequest.method == 'OPTIONS':
+            return Response(status=200, headers=headers)
 
-        matches = request.env['last.match'].sudo().search([])
-        all_match = len(matches)
+        try:
+            footballer = request.env['hr.employee'].sudo().search([
+                ('id', '=', footballer_id),
+                ('roll', '=', 'footballer')
+            ], limit=1)
 
-        total_goals = sum(lineup.goals for lineup in lineups)
-        total_assist = sum(lineup.assists for lineup in lineups)
-        match_played = len(lineups)
-        samgurali = request.env['table'].sudo().search([
-            ('club_id.name', '=', 'სამგურალი')
-        ], limit=1)
+            if not footballer:
+                return Response(json.dumps({'error': 'მოთამაშე ვერ მოიძებნა'}), status=404, headers=headers)
 
-        team_lineups = request.env['match.lineup'].sudo()
-        total_team_assist = sum(lineup.assists for lineup in team_stats)
+            lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
+            matches = request.env['last.match'].sudo().search([])
+            team_stats = request.env['match.lineup'].sudo().search([])
 
-        if samgurali:
-            total_team_goals = samgurali.goals  # თუ გაქვთ goals ველი
-        image_data = footballer.image_1920
-        if isinstance(image_data, bytes):
-            image_data = image_data.decode('utf-8')
+            total_goals = sum(l.goals for l in lineups)
+            total_assists = sum(l.assists for l in lineups)
+            match_played = len(lineups)
+            all_match = len(matches)
 
-        footballer_detail = []
-        footballer_detail.append({
-            'id': footballer.id,
-            'number': footballer.number,
-            'birthday': footballer.birthday,
-            'footballer_country': footballer.footballer_country.name,
-            'position': footballer.position,
-            'roll': footballer.roll,
-            'name': footballer.name,
-            'image': f'data:image/png;base64,{image_data}',
-            'age': footballer.age,
-            'footballer_goals': total_goals,
-            'footballer_assists': total_assist,
-            'total_team_goals': total_team_goals,
-            'total_team_assists': total_team_assist,
-            'match_played': match_played,
-            'all_match': all_match,
+            samgurali = request.env['table'].sudo().search([
+                ('club_id.name', '=', 'სამგურალი')
+            ], limit=1)
 
-        })
+            total_team_goals = samgurali.goals if samgurali else 0
+            total_team_assists = sum(l.assists for l in team_stats)
 
-        return Response(
-            json.dumps({'data': footballer_detail}),
-            content_type='application/json;charset=utf-8',
-        )
+            image_data = footballer.image_1920
+            if isinstance(image_data, bytes):
+                image_data = image_data.decode('utf-8')
+
+            footballer_detail = [{
+                'id': footballer.id,
+                'number': footballer.number,
+                'birthday': footballer.birthday,
+                'footballer_country': footballer.footballer_country.name,
+                'position': footballer.position,
+                'roll': footballer.roll,
+                'name': footballer.name,
+                'image': f'data:image/png;base64,{image_data}',
+                'age': footballer.age,
+                'footballer_goals': total_goals,
+                'footballer_assists': total_assists,
+                'total_team_goals': total_team_goals,
+                'total_team_assists': total_team_assists,
+                'match_played': match_played,
+                'all_match': all_match,
+            }]
+
+            return Response(json.dumps({'data': footballer_detail}), headers=headers)
+
+        except Exception as e:
+            return Response(json.dumps({'error': str(e
 
     @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
     def top_scorers(self, **kwargs):
