@@ -261,7 +261,7 @@ class FootballerInfo(http.Controller):
                 ('club_id.name', '=', 'სამგურალი')
             ], limit=1)
 
-            total_team_goals = samgurali.goals if samgurali else 0
+            total_team_goals = sum(l.goals for l in team_stats)
             total_team_assists = sum(l.assists for l in team_stats)
 
             image_data = footballer.image_1920
