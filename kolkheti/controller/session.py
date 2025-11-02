@@ -225,11 +225,7 @@ class Doctors(http.Controller):
 
 class FootballerInfo(http.Controller):
 
-    @http.route('/web/footballer/<int:footballer_id>',
-                auth='public',
-                type='http',
-                methods=['GET', 'OPTIONS'],
-                csrf=False)
+    @http.route('/web/footballer/<int:footballer_id>',auth='public',type='http',methods=['GET', 'OPTIONS'],csrf=False)
     def footballer_info(self, footballer_id, **kwargs):
         # ეს ჰედერები უნდა დაემატოს ყველა პასუხზე
         headers = {
@@ -293,7 +289,8 @@ class FootballerInfo(http.Controller):
             return Response(json.dumps({'data': footballer_detail}), headers=headers)
 
         except Exception as e:
-            return Response(json.dumps({'error': str(e
+            return Response(json.dumps({'error': str(e)})
+    )
 
     @http.route('/web/top/scoreer', auth="public", methods=['GET'], cors='*', csrf=False)
     def top_scorers(self, **kwargs):
