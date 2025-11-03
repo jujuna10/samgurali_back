@@ -101,7 +101,7 @@ class Matches(http.Controller):
 
     @http.route('/web/nextmatch', auth="none", cors='*', methods=['GET'])
     def next_match(self):
-        next_match_records = request.env['next.match'].sudo().search([], limit=1, order='id desc')
+        next_match_records = request.env['next.match'].sudo().search([], limit=1, order='id asc')
         result = []
         for i in next_match_records:
             result.append({
@@ -122,7 +122,7 @@ class Matches(http.Controller):
 
     @http.route('/web/nextmatches', auth="none", cors='*', methods=['GET'])
     def next_matches(self):
-        next_match_records = request.env['next.match'].sudo().search([], limit=3, order='id desc')
+        next_match_records = request.env['next.match'].sudo().search([], limit=3, order='id asc')
         result = []
         for i in next_match_records:
             result.append({
@@ -141,8 +141,8 @@ class Matches(http.Controller):
         )
 
     @http.route('/web/next/matches/page', auth="none", cors='*', methods=['GET'])
-    def next_match(self):
-        next_match_records = request.env['next.match'].sudo().search([], limit=10, order='id desc')
+    def next_match_page(self):
+        next_match_records = request.env['next.match'].sudo().search([], limit=10, order='id asc')
         result = []
         for i in next_match_records:
             result.append({
@@ -160,6 +160,36 @@ class Matches(http.Controller):
             json.dumps({'data': result}),
             content_type='application/json;charset=utf-8',
         )
+
+    @http.route('/web/last/teams/matches/<string:first>/<string:second>', auth="none", cors='*', methods=['GET'])
+    def last_teams_matches(self, first, second):
+        domain = ['|',
+                  '&', ('home_club_id.name', '=', first), ('away_club_id.name', '=', second),
+                  '&', ('home_club_id.name', '=', second), ('away_club_id.name', '=', first)
+                  ]
+        matches = request.env['last.match'].sudo().search(domain, order='id desc', limit=5)
+
+        data = []
+        for i in matches:
+            data.append({
+                'id': i.id,
+                'away': i.away_club_id.name if i.away_club_id else None,
+                'home': i.home_club_id.name if i.home_club_id else None,
+                'away_team_photo': 'data:image/png;base64,' + i.away_photo.decode('utf-8') if i.away_photo else False,
+                'home_team_photo': 'data:image/png;base64,' + i.home_photo.decode('utf-8') if i.home_photo else False,
+                'away_team_goals': i.away_team_goals,
+                'home_team_goals': i.home_team_goals,
+                'date': i.date.strftime('%Y-%m-%d %H:%M') if i.date else None,
+                'stadium': i.stadium.name if i.stadium else None,
+                'tournament': i.tournament,
+
+            })
+
+        return Response(
+            json.dumps({'data': data}, ensure_ascii=False),
+            content_type='application/json; charset=utf-8'
+        )
+
 
 class Footballer(http.Controller):
     @http.route('/web/footballers', auth="public", cors='*', methods=['GET'])
