@@ -99,7 +99,7 @@ class Matches(http.Controller):
             content_type='application/json;charset=utf-8',
         )
 
-    @http.route('/web/nextmatch', auth="none", cors='*', methods=['GET'])
+    @http.route('/web/nextmatch', type='http', auth="none", cors='*', methods=['GET'])
     def next_match(self):
         next_match_records = request.env['next.match'].sudo().search([], limit=1, order='id asc')
         result = []
