@@ -34,7 +34,9 @@ Long description of module's purpose
         'views/country.xml',
         'views/stats.xml',
         'views/video.xml',
-        'views/photos.xml'
+        'views/photos.xml',
+        'views/matches.xml',
+        'views/gallery.xml'
     ]
 }
 

@@ -50,24 +50,28 @@
                 <group string="Midfielder Stats" invisible="position not in ['midfielder', 'Midfielder']">
                     <field name="goals"/>
                     <field name="assists"/>
-                    <field name="key_passes"/>
-                    <field name="shots"/>
-                    <field name="shots_on_target"/>
+<!--                    <field name="key_passes"/>-->
+<!--                    <field name="shots"/>-->
+<!--                    <field name="shots_on_target"/>-->
                 </group>
 
                 <!-- Defender Stats -->
                 <group string="Defender Stats" invisible="position not in ['Defender', 'defender']">
                     <field name="goals"/>
                     <field name="assists"/>
-                    <field name="key_passes"/>
+<!--                    <field name="key_passes"/>-->
+                    <field name="tackle"/>
+                    <field name="successful_tackle"/>
+
                 </group>
 
                 <!-- Goalkeeper Stats -->
                 <group string="Goalkeeper Stats" invisible="position not in ['Goalkeeper', 'goalkeeper']">
                     <field name="saves"/>
-                    <field name="goals_conceded"/>
+<!--                    <field name="goals_conceded"/>-->
                     <field name="clean_sheets"/>
                     <field name="assists"/>
+                    <field name="goalkeeper_shots"/>
                 </group>
             </form>
         </field>
@@ -76,7 +80,7 @@
     <record id="action_match_lineup" model="ir.actions.act_window">
         <field name="name">Match Lineup</field>
         <field name="res_model">match.lineup</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem id="menu_match_lineup_root"

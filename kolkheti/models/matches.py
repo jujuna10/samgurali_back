@@ -82,8 +82,14 @@ class MatchLineup(models.Model):
     shots_on_target = fields.Integer(string='Shots on Target', default=0)
     key_passes = fields.Integer(string='Key Passes', default=0)
     saves = fields.Integer(string='Saves', default=0)
-    goals_conceded = fields.Integer(string='Goals Conceded', default=0)
+    # goals_conceded = fields.Integer(string='Goals Conceded', default=0)
     clean_sheets = fields.Integer(string='Clean Sheets', default=0)
+    tackle = fields.Integer(string='tackle', default=0)
+    successful_tackle = fields.Integer(string='successful_tackle', default=0)
+    goalkeeper_shots = fields.Integer(string='goalkeeper shots', default=0)
+
+
+
 
     @api.onchange('player_id')
     def _onchange_player_id(self):
@@ -107,8 +113,6 @@ class MatchPhotos(models.Model):
 
     image = fields.Binary(string='Photo')
     game_id = fields.Many2one('last.match', string='Match', required=True, ondelete='cascade')
-
-
 
 class NextMatch(models.Model):
     _name = 'next.match'

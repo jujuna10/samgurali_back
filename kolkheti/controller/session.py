@@ -275,12 +275,23 @@ class FootballerInfo(http.Controller):
                 ('roll', '=', 'footballer')
             ], limit=1)
 
+
+
             if not footballer:
                 return Response(json.dumps({'error': 'მოთამაშე ვერ მოიძებნა'}), status=404, headers=headers)
-
             lineups = request.env['match.lineup'].sudo().search([('player_id', '=', footballer_id)])
             matches = request.env['last.match'].sudo().search([])
             team_stats = request.env['match.lineup'].sudo().search([])
+
+            if footballer.position == 'defender':
+                tackles = sum(l.tackle for l in lineups)
+                successful_tackle = sum(l.successful_tackle for l in lineups)
+
+            elif footballer.position == 'goalkeeper':
+                clean_sheets = sum(l.clean_sheets for l in lineups)
+                shots = sum(l.goalkeeper_shots for l in lineups)
+                saves = sum(l.saves for l in lineups)
+
 
             total_goals = sum(l.goals for l in lineups)
             total_assists = sum(l.assists for l in lineups)
@@ -298,25 +309,30 @@ class FootballerInfo(http.Controller):
             if isinstance(image_data, bytes):
                 image_data = image_data.decode('utf-8')
 
-            footballer_detail = [{
-                'id': footballer.id,
-                'number': footballer.number,
-                'birthday': footballer.birthday,
-                'footballer_country': footballer.footballer_country.name,
-                'position': footballer.position,
-                'roll': footballer.roll,
-                'name': footballer.name,
-                'image': f'data:image/png;base64,{image_data}',
-                'age': footballer.age,
-                'footballer_goals': total_goals,
-                'footballer_assists': total_assists,
-                'total_team_goals': total_team_goals,
-                'total_team_assists': total_team_assists,
-                'match_played': match_played,
-                'all_match': all_match,
-            }]
+            same_info = {'id': footballer.id,
+                         'number': footballer.number,
+                         'footballer_country': footballer.footballer_country.name,
+                         'position': footballer.position,
+                         'roll': footballer.roll,
+                         'name': footballer.name,
+                         'image': f'data:image/png;base64,{image_data}',
+                         'age': footballer.age,
+                         'footballer_goals': total_goals,
+                         'footballer_assists': total_assists,
+                         'total_team_goals': total_team_goals,
+                         'total_team_assists': total_team_assists,
+                         'match_played': match_played,
+                         'all_match': all_match,
+                         }
 
-            return Response(json.dumps({'data': footballer_detail}), headers=headers)
+            if footballer.position == 'defender':
+                same_info.update([("tackle", tackles), ("successful_tackles", successful_tackle)])
+
+            elif footballer.position == 'goalkeeper':
+                same_info.update([("clean_sheets", clean_sheets), ('shots', shots), ('saves', saves)])
+
+
+            return Response(json.dumps({'data': same_info}), headers=headers)
 
         except Exception as e:
             return Response(json.dumps({'error': str(e)})

@@ -83,6 +83,19 @@ class HrEmployee(models.Model):
         ('medical staff', 'Medical Staff'),
 
     ])
+    goals = fields.Integer(string="goals", compute='_compute_stats')
+    assists = fields.Integer(string="asists", compute='_compute_stats')
+    clean_sheets = fields.Integer(string="clean sheets", compute='_compute_stats')
+
+    def _compute_stats(self):
+        lineups = self.env['match.lineup'].sudo().search([('player_id', '=', self.id)])
+        total_goals = sum(l.goals for l in lineups)
+        total_assists = sum(l.assists for l in lineups)
+        total_clean_sheets = sum(l.clean_sheets for l in lineups)
+
+        self.goals = total_goals
+        self.assists = total_assists
+        self.clean_sheets = total_clean_sheets
 
 class News(models.Model):
     _name = 'news'

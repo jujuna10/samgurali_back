@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+
+    <menuitem id="root_matches_menu" parent="root_menu" name="Matches">
+        <menuitem id="menu_last_match" name="Last match" action="action_last_match"/>
+        <menuitem id="menu_next_match" name="Next match" action="action_next_match"/>
+
+    </menuitem>
+
+</odoo>

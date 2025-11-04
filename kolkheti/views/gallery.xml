@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+
+    <menuitem id="root_gallery_menu" parent="root_menu" name="Gallery">
+         <menuitem id="menu_match_photos_root" name="Match Photos" action="action_match_photos"/>
+         <menuitem id="menu_video_root" name="Video" action="action_video"/>
+
+    </menuitem>
+
+</odoo>

@@ -15,8 +15,7 @@
                     <field name="date"/>
                     <field name="stadium"/>
                     <field name="tournament"/>
-                                        <field name="photos_ids" />
-
+                    <field name="photos_ids" widget="image"  />
             </list>
         </field>
     </record>
@@ -37,7 +36,11 @@
                             <field name="date"/>
                             <field name="stadium"/>
                             <field name="tournament"/>
-                        <field name="photos_ids" />
+                            <field name="photos_ids">
+                                <list>
+                                    <field name="image" widget="image" />
+                                </list>
+                            </field>
                     </group>
                 </sheet>
             </form>
@@ -51,6 +54,4 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <!-- Menu -->
-    <menuitem id="menu_last_match" name="Last match" parent="root_menu" action="action_last_match"/>
 </odoo>

@@ -49,6 +49,11 @@
                 <field name="birthday" placeholder="Birthday"/>
                 <field name="footballer_country" placeholder="Country"/>
                 <field name="position" placeholder="Position" invisible="roll != 'footballer'" />
+                <field name="goals" placeholder="Position" />
+                <field name="assists" placeholder="Position" />
+                <field name="clean_sheets" placeholder="Position" />
+
+
             </field>
         </field>
     </record>
